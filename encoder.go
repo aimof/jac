@@ -7,7 +7,7 @@ import (
 )
 
 func Encode(runes []rune) ([]uint8, error) {
-	var tmp uint64
+	var tmp uint64 = 0x1000000
 	u := make([]uint8, 0, 3*len(runes))
 	for _, r := range runes {
 		n, err := identify(r)
@@ -15,15 +15,11 @@ func Encode(runes []rune) ([]uint8, error) {
 			return nil, err
 		}
 		if n < 0x1000 {
-			if tmp != 0 && tmp < 0x1000 {
-				tmp = (tmp << 12) | n
-				u = append(u, uint8((tmp&0xFF0000)>>16))
-				u = append(u, uint8((tmp&0x00FF00)>>8))
-				u = append(u, uint8(tmp&0x0000FF))
-				tmp = 0
+			if tmp < 0x1000 {
+				u = append(u, combine(tmp, n)...)
+				tmp = 0x1000000
 				continue
-			}
-			if tmp == 0 {
+			} else if tmp > 0xFFFFFF {
 				tmp = n
 				continue
 			}
@@ -43,12 +39,9 @@ func Encode(runes []rune) ([]uint8, error) {
 		} else {
 			return nil, errors.New("Too big rune")
 		}
-		if tmp > 0xFFFFFF {
-			return nil, errors.New("tmp is too big")
-		}
 	}
-	if tmp != 0 {
-
+	if tmp != 0x1000000 {
+		u = append(u, combine(tmp, 0x555)...)
 	}
 	return u, nil
 }

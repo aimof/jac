@@ -10,7 +10,9 @@ func TestEncode(t *testing.T) {
 		input    []rune
 		expected []uint8
 	}{
-		{[]rune("aa"), []uint8{0x96, 0x96, 0x96}},
+		{[]rune("aa"), []uint8{0x96, 0x19, 0x61}},
+		{[]rune("いか"), []uint8{0x00, 0x00, 0xFF}},
+		{[]rune("亜一、"), []uint8{0x02, 0xB0, 0x03, 0x80, 0x15, 0x55}},
 	}
 	for _, tt := range testCases {
 		r, err := Encode(tt.input)

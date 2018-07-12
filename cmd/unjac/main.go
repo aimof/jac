@@ -1,7 +1,9 @@
 package main
 
 import (
-	"encoding/binary"
+	"bufio"
+	"fmt"
+	"io"
 	"log"
 	"os"
 
@@ -9,18 +11,21 @@ import (
 )
 
 func main() {
-	b := make([]byte, 0, 16384)
+	buf := bufio.NewReader(os.Stdin)
+	bytes := make([]byte, 0, 16384)
 	for {
-		err := binary.Read(os.Stdin, binary.BigEndian, b)
-		if err != nil {
+		b, err := buf.ReadByte()
+		if err == io.EOF {
+			break
+		} else if err != io.EOF && err != nil {
 			log.Fatalln(err)
 		}
+		bytes = append(bytes, b)
 	}
 
-	u := jac.Decode(b)
-	if err != nil {
-		log.Fatalln(err)
-	}
+	u := jac.Decode(bytes)
 
-	f.Write(os.Stdout)
+	for _, n := range u {
+		fmt.Printf("%c", n)
+	}
 }
