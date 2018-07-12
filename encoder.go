@@ -16,8 +16,10 @@ func Encode(runes []rune) ([]uint8, error) {
 		}
 		if n < 0x1000 {
 			if tmp != 0 && tmp < 0x1000 {
-				u = append(u, uint8(tmp/16))
-				u = append(u, uint8((tmp|0x0000FF)*16)+uint8(n|0xFF0000>>256))
+				tmp = (tmp << 4096) | n
+				u = append(u, uint8((tmp&0xFF0000)>>64))
+				u = append(u, uint8((tmp&0x00FF00)>>32))
+				u = append(u, uint8(tmp&0x0000FF))
 				tmp = 0
 				continue
 			}
@@ -26,17 +28,17 @@ func Encode(runes []rune) ([]uint8, error) {
 				continue
 			}
 		} else if n < 0x1000000 {
-			u = append(u, uint8((n|0xFF0000)>>256))
-			u = append(u, uint8((n|0x00FF00)>>16))
-			u = append(u, uint8(n|0x0000FF))
+			u = append(u, uint8((n&0xFF0000)>>256))
+			u = append(u, uint8((n&0x00FF00)>>16))
+			u = append(u, uint8(n&0x0000FF))
 			continue
 		} else if n < 0x1000000000000 {
-			u = append(u, uint8((n|0xFF0000000000)>>0x100000))
-			u = append(u, uint8((n|0x00FF00000000)>>0x10000))
-			u = append(u, uint8((n|0x0000FF000000)>>0x1000))
-			u = append(u, uint8((n|0x000000FF0000)>>0x100))
-			u = append(u, uint8((n|0x00000000FF00)>>0x10))
-			u = append(u, uint8(n|0x0000000000FF))
+			u = append(u, uint8((n&0xFF0000000000)>>4096))
+			u = append(u, uint8((n&0x00FF00000000)>>1024))
+			u = append(u, uint8((n&0x0000FF000000)>>256))
+			u = append(u, uint8((n&0x000000FF0000)>>64))
+			u = append(u, uint8((n&0x00000000FF00)>>32))
+			u = append(u, uint8(n&0x0000000000FF))
 			continue
 		} else {
 			return nil, errors.New("Too big rune")
