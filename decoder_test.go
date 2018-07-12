@@ -1,6 +1,7 @@
 package jac
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 )
@@ -24,6 +25,31 @@ func TestToUnicodes(t *testing.T) {
 		}
 		if !reflect.DeepEqual(actual, tt.expected) {
 			t.Errorf("input: %v\nexpected: %v\nactual: %v", tt.input, tt.expected, actual)
+		}
+	}
+}
+
+func TestBoth(t *testing.T) {
+	testCases := []struct {
+		chara []rune
+	}{
+		{[]rune("あ")},
+		{[]rune("こころ")},
+		{[]rune("Hello, world!")},
+		{[]rune("亜")},
+	}
+
+	for _, tt := range testCases {
+		b, err := Encode(tt.chara)
+		if err != nil {
+			t.Error(err)
+		}
+		unicodes := Decode([]byte(b))
+
+		var r = make([]rune, 0, len(unicodes))
+		for _, u := range unicodes {
+			tmp := fmt.Sprintf("%c", u)
+			r = append(r, []rune(tmp)[0])
 		}
 	}
 }

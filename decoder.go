@@ -4,26 +4,27 @@ import (
 	"log"
 )
 
-/*func Decode(bytes []byte) []uint64 {
+func Decode(bytes []byte) []uint64 {
 	if len(bytes)%3 != 0 {
-		log.Fatalln(err)
+		log.Fatalln("bytes must be 3*n")
 	}
 
 	unicodes := make([]uint64, len(bytes)/3*2)
-	bigUnicodes := make([]uint8, 0, 3)
+	tmpBigUnicodes := make([]uint8, 0, 3)
 	for i := 0; i < len(bytes)/3; i++ {
 		tmp := bytes[i : i+3]
 		target := []uint8(tmp)
-		if bigUnicodes != 0x0 {
-			unicodes = unicodes.append()
-
-		}
-		if target[0]&0xF0 == 0xD {
-
+		if len(tmpBigUnicodes) == 3 {
+			unicodes = append(unicodes, ((uint64(tmpBigUnicodes[0])&0xF0)<<20)|(uint64(tmpBigUnicodes[1])<<16)|(uint64(tmpBigUnicodes[2])<<12)|(uint64(target[0])<<8)|(uint64(target[1])<<4)|uint64(target[2]))
+			tmpBigUnicodes = nil
+		} else {
+			var u []uint64
+			u, tmpBigUnicodes = toUnicodes(target)
+			unicodes = append(unicodes, u...)
 		}
 	}
+	return unicodes
 }
-*/
 
 func toUnicodes(bytes []byte) (unicodes []uint64, tmp []uint8) {
 	unicodes = make([]uint64, 0, len(bytes)/3*2)
