@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-	"unicode/utf8"
 )
 
 func Encode(runes []rune) ([]uint8, error) {
@@ -49,32 +48,29 @@ func Encode(runes []rune) ([]uint8, error) {
 	return u, nil
 }
 
+/*
+	0xFFF以下のuint64もしくは0x6...........を返却
+*/
 func identify(r rune) (uint64, error) {
 	u, err := strconv.ParseUint(fmt.Sprintf("%U", r)[2:6], 16, 64)
 	if err != nil {
-		return 0x00, err
-	}
-	if u >= 0x3000 && u < 0x3100 {
-		return (u & 0x00FF) | 0x300, nil
-	}
-	if u >= 0xFF00 && u <= 0xFFFF {
-		return (u & 0x00FF) | 0x400, nil
+		return 0x900, err
 	}
 	if v, ok := mapUToJoc[u]; ok {
 		return v, nil
 	}
-	switch utf8.RuneLen(r) {
-	case 1:
-		return u | 0x100, nil
-	case 2:
-		return u | 0x220000, nil
-	case 3:
-		return u | 0xEE0000, nil
-	case 4:
-		return u << 32, nil
-	case 5:
-		return u << 16, nil
+	if u >= 0x3000 && u < 0x3100 {
+		return (u & 0x00FF) | 0xA00, nil
+	}
+	if u >= 0xFF00 && u <= 0xFFFF {
+		return (u & 0x00FF) | 0xB00, nil
+	}
+	switch {
+	case u < 0x100:
+		return u | 0x900, nil
+	case u < 0x100000:
+		return u | 0xC00000, nil
 	default:
-		return u, nil
+		return u | 0xD00000000000, nil
 	}
 }
