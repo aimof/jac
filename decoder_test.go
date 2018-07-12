@@ -51,5 +51,8 @@ func TestBoth(t *testing.T) {
 			tmp := fmt.Sprintf("%c", u)
 			r = append(r, []rune(tmp)[0])
 		}
+		if !reflect.DeepEqual(r, tt.chara) {
+			t.Errorf("expected: %v\nactual: %v", tt.chara, r)
+		}
 	}
 }
