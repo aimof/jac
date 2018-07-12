@@ -1,6 +1,46 @@
 package jac
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
+
+func TestEncode(t *testing.T) {
+	testCases := []struct {
+		input    []rune
+		expected []uint8
+	}{
+		{[]rune("aa"), []uint8{0x96, 0x96, 0x96}},
+	}
+	for _, tt := range testCases {
+		r, err := Encode(tt.input)
+		if err != nil {
+			t.Error(err)
+		}
+		if !reflect.DeepEqual(r, tt.expected) {
+			t.Errorf("input: %X, expected: %X, actual: %X", tt.input, tt.expected, r)
+		}
+	}
+}
+
+func TestCombine(t *testing.T) {
+	testCases := []struct {
+		input    []uint64
+		expected []uint8
+	}{
+		{[]uint64{0x000, 0x000}, []uint8{0x00, 0x00, 0x00}},
+		{[]uint64{0xABC, 0x000}, []uint8{0xAB, 0xC0, 0x00}},
+		{[]uint64{0xFFF, 0xFFF}, []uint8{0xFF, 0xFF, 0xFF}},
+		{[]uint64{0xAB0, 0x0F9}, []uint8{0xAB, 0x00, 0xF9}},
+	}
+
+	for _, tt := range testCases {
+		b := combine(tt.input[0], tt.input[1])
+		if !reflect.DeepEqual(b, tt.expected) {
+			t.Errorf("input: %X, expected: %X, actual: %X", tt.input, tt.expected, b)
+		}
+	}
+}
 
 func TestIdentify(t *testing.T) {
 	testcases := []struct {
