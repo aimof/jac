@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"bytes"
 	"encoding/binary"
 	"io"
 	"log"
@@ -29,19 +28,11 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	buf := bytes.NewBuffer(make([]byte, 0, 3*len(u)))
 	for _, n := range u {
-		err = binary.Write(buf, binary.BigEndian, n)
+		err = binary.Write(os.Stdout, binary.BigEndian, n)
 		if err != nil {
 			log.Fatalln(err)
 		}
 	}
 
-	f, err := os.Create("kokoro-utf8.txt.jac")
-	if err != nil {
-		log.Fatalln(err)
-	}
-	defer f.Close()
-
-	f.Write(buf.Bytes())
 }
